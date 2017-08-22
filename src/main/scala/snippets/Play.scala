@@ -216,7 +216,9 @@ class CPU extends Module {
 
   val conter100 = counter(UInt(100))
 
-  val myVec = Vec.fill(3) { SInt(width = 10) }
+  // was the old way to declare a Vec
+  // val myVec = Vec.fill(3) { SInt(width = 10) }
+  val myVec = Vec(3, SInt(width = 10))
   val y = myVec(2)
   myVec(0) := SInt(-3)
 
