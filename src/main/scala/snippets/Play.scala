@@ -90,6 +90,43 @@ class Adder extends Module {
   io.result := addVal
 }
 
+object Adder {
+  def apply(a: UInt, b: UInt) = {
+    val adder = Module(new Adder)
+    adder.io.a := a
+    adder.io.b := b
+    adder.io.result
+  }
+
+}
+
+class UseAdder extends Module {
+  val io = new Bundle {}
+
+  val x = UInt(3, 4)
+  val y = UInt(4, 4)
+
+  // classic instantiation
+  val adder = Module(new Adder)
+  adder.io.a := x
+  adder.io.b := y
+  val result = adder.io.result
+
+  // hide in a function
+  def add(x: UInt, y: UInt): UInt = {
+    val adder = Module(new Adder)
+    adder.io.a := x
+    adder.io.b := y
+    adder.io.result
+  }
+  
+  val res1 = add(x, y)
+  
+  // better use the factory method
+  val myAdder = Adder(x, y)
+
+}
+
 class ParamAdder(n: Int) extends Module {
   val io = new Bundle {
     val a = UInt(INPUT, n)
@@ -221,7 +258,7 @@ class CPU extends Module {
   val myVec = Vec(3, SInt(width = 10))
   val y = myVec(2)
   myVec(0) := SInt(-3)
-  
+
   // A register file
   val vecReg = Reg(Vec(32, SInt(width = 32)))
 
@@ -241,8 +278,8 @@ class CPU extends Module {
   val useA = false
 
   class Base extends Module { val io = new Bundle() }
-  class VariantA extends Base { }
-  class VariantB extends Base { }
+  class VariantA extends Base {}
+  class VariantB extends Base {}
 
   val m = if (useA) Module(new VariantA())
   else Module(new VariantB())
