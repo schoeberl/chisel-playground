@@ -221,6 +221,9 @@ class CPU extends Module {
   val myVec = Vec(3, SInt(width = 10))
   val y = myVec(2)
   myVec(0) := SInt(-3)
+  
+  // A register file
+  val vecReg = Reg(Vec(32, SInt(width = 32)))
 
   val ch32 = new ParamChannel(32)
   val add8 = Module(new ParamAdder(8))
