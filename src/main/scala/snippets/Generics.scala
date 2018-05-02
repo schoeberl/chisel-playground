@@ -5,6 +5,7 @@ import Chisel._
 class Generics[T <: Data](gen: T) extends Module {
   val io = new Bundle {
     val dout = Output(gen.clone)
+    // val dout = Output(gen) // this does give a Chisel runtime exception
   }
 
   io.dout := 42.U
