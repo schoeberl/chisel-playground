@@ -12,18 +12,23 @@ package snippets
 
 import scala.io.Source._
 import Chisel._
+// this is Chisel 2 syntax by importing Chisel._ instead of chisel3._
+import chisel3.iotesters.PeekPokeTester
+
+// TODO: this code should all be changed to real Chisel 3 or simply dropped
 
 object Helper {
 
-  def fileRead(fileName: String): Vec[Bits] = {
+  // this example could probably be improved
+  def fileRead(fileName: String): Vec[UInt] = {
     val source = fromFile(fileName)
     val byteArray = source.map(_.toByte).toArray
     source.close()
-    val arr = new Array[Bits](byteArray.length)
+    val arr = new Array[UInt](byteArray.length)
     for (i <- 0 until byteArray.length) {
-      arr(i) = Bits(byteArray(i), 8)
+      arr(i) = byteArray(i).asUInt()
     }
-    val rom = Vec[Bits](arr)
+    val rom = Vec[UInt](arr)
     rom
   }
 }
@@ -80,11 +85,11 @@ class ExecuteIO extends Bundle {
 }
 
 class Adder extends Module {
-  val io = new Bundle {
+  val io = IO(new Bundle {
     val a = UInt(INPUT, 4)
     val b = UInt(INPUT, 4)
     val result = UInt(OUTPUT, 4)
-  }
+  })
 
   val addVal = io.a + io.b
   io.result := addVal
@@ -101,7 +106,7 @@ object Adder {
 }
 
 class UseAdder extends Module {
-  val io = new Bundle {}
+  val io = IO(new Bundle {})
 
   val x = UInt(3, 4)
   val y = UInt(4, 4)
@@ -119,45 +124,45 @@ class UseAdder extends Module {
     adder.io.b := y
     adder.io.result
   }
-  
+
   val res1 = add(x, y)
-  
+
   // better use the factory method
   val myAdder = Adder(x, y)
 
 }
 
 class ParamAdder(n: Int) extends Module {
-  val io = new Bundle {
+  val io = IO(new Bundle {
     val a = UInt(INPUT, n)
     val b = UInt(INPUT, n)
     val result = UInt(OUTPUT, n)
-  }
+  })
 
   val addVal = io.a + io.b
   io.result := addVal
 }
 
 class Decode extends Module {
-  val io = new Bundle {
+  val io = IO(new Bundle {
     val toExe = new DecodeExecute().asOutput
-  }
+  })
 }
 
 class Execute extends Module {
-  val io = new ExecuteIO()
+  val io = IO(new ExecuteIO())
 }
 
 class Memory extends Module {
-  val io = new Bundle {
+  val io = IO(new Bundle {
     val fromExe = new ExecuteMemory().asInput
-  }
+  })
 }
 
 class Count extends Module {
-  val io = new Bundle {
+  val io = IO(new Bundle {
     val cnt = UInt(OUTPUT, 8)
-  }
+  })
 
   val cntReg = Reg(init = UInt(0, 8))
 
@@ -172,29 +177,30 @@ class Count extends Module {
 }
 
 class CPU extends Module {
-  val io = new Bundle {
+  val io = IO(new Bundle {
     val leds = UInt(OUTPUT, 4)
-  }
+  })
 
   val dec = Module(new Decode())
   val exe = Module(new Execute())
   val mem = Module(new Memory())
 
-  dec.io <> exe.io
-  mem.io <> exe.io
+  // TODO: here we run into different bundles handling between Chisel 2 and 3, to be explored
+//  dec.io <> exe.io
+//  mem.io <> exe.io
 
   val adder = Module(new Adder())
 
-  val ina = UInt(width = 4)
-  val inb = UInt(width = 4)
+  val ina = Wire(UInt(width = 4))
+  val inb = Wire(UInt(width = 4))
 
   adder.io.a := ina
   adder.io.b := inb
   val result = adder.io.result
 
-  val a = UInt(width = 8)
-  val b = UInt(width = 8)
-  val d = UInt(width = 8)
+  val a = UInt(1, width = 8)
+  val b = UInt(0, width = 8)
+  val d = UInt(3, width = 8)
 
   val cond = a =/= b
 
@@ -206,25 +212,37 @@ class CPU extends Module {
 
   val selection = Mux(cond, trueVal, falseVal)
 
-  (a | b) & ~(c ^ d)
+  // (a | b) & ~(c ^ d)
 
   val c1 = Bool(true)
   val c2 = Bool(false)
   val c3 = Bool(false)
 
-  val v = UInt(5)
+  val v = Wire(UInt(5))
   when(condition) {
     v := UInt(0)
   }
 
-  when(c1) { v := UInt(1) }
-  when(c2) { v := UInt(2) }
+  when(c1) {
+    v := UInt(1)
+  }
+  when(c2) {
+    v := UInt(2)
+  }
 
-  when(c1) { v := UInt(1) }
-    .elsewhen(c2) { v := UInt(2) }
-    .otherwise { v := UInt(3) }
+  when(c1) {
+    v := UInt(1)
+  }
+    .elsewhen(c2) {
+      v := UInt(2)
+    }
+    .otherwise {
+      v := UInt(3)
+    }
 
-  val latch = UInt(width = 5)
+  // Where is here the default assignment?
+  // Does this work only in the compatibility version or also in Chisel 3?
+  val latch = Wire(UInt(width = 5))
   when(cond) {
     latch := UInt(3)
   }
@@ -255,7 +273,7 @@ class CPU extends Module {
 
   // was the old way to declare a Vec
   // val myVec = Vec.fill(3) { SInt(width = 10) }
-  val myVec = Vec(3, SInt(width = 10))
+  val myVec = Wire(Vec(3, SInt(width = 10)))
   val y = myVec(2)
   myVec(0) := SInt(-3)
 
@@ -265,37 +283,45 @@ class CPU extends Module {
   val ch32 = new ParamChannel(32)
   val add8 = Module(new ParamAdder(8))
 
-  val inVal = UInt(0)
+  val inVal = Wire(UInt(width = 8))
+  inVal := 42.U
 
   val shiftReg = Reg(init = UInt(0, 8))
 
-  shiftReg(0) := inVal
+  // The following assignment throw FIRRTL out
+  // This should be legal Chisel code (it was in Chisel 2!)
+  // TODO: file an issue
+  // shiftReg(0) := inVal
 
   for (i <- 1 until 8) {
-    shiftReg(i) := shiftReg(i - 1)
+    //shiftReg(i) := shiftReg(i - 1)
   }
 
   val useA = false
 
-  class Base extends Module { val io = new Bundle() }
+  class Base extends Module {
+    val io = new Bundle {}
+  } // following breaks in Chisel 3 compatibility { val io = new Bundle() }
   class VariantA extends Base {}
+
   class VariantB extends Base {}
 
   val m = if (useA) Module(new VariantA())
   else Module(new VariantB())
 }
+
 /**
- * A simple, configurable counter that wraps around.
- */
+  * TODO: fix or drop, this has a runtime exception in Chisel 3 missing probably a Wire()
+  */
 class Play(size: Int) extends Module {
-  val io = new Bundle {
+  val io = IO(new Bundle {
     val out = UInt(OUTPUT, size)
     val a = UInt(INPUT, 4)
     val b = UInt(INPUT, 4)
     val c = UInt(INPUT, 4)
     val d = UInt(INPUT, 4)
     val result = UInt(OUTPUT, 4)
-  }
+  })
 
   val r1 = Reg(init = UInt(0, size))
   r1 := r1 + UInt(1)
@@ -320,49 +346,49 @@ class Play(size: Int) extends Module {
 
   def adder(v1: UInt, v2: UInt) = v1 + v2
 
-  val add1 = adder(a, b)
-  val add2 = adder(c, d)
+//  val add1 = adder(a, b)
+//  val add2 = adder(c, d)
 
   val cpu = Module(new CPU())
 
-  val cores = new Array[Module](32)
-  for (j <- 0 until 32)
-    cores(j) = Module(new CPU())
-
-  io.out := r1
+//  val cores = new Array[Module](32)
+//  for (j <- 0 until 32)
+//    cores(j) = Module(new CPU())
+//
+//  io.out := r1
 }
 
 /**
- * Test the counter by printing out the value at each clock cycle.
- */
-class PlayTester(c: Play) extends Tester(c) {
+  * Test the counter by printing out the value at each clock cycle.
+  */
+class PlayTester(c: Play) extends PeekPokeTester(c) {
 
   //  step(10)
   for (i <- 0 until 5) {
-    println(i)
-    println(peek(c.io.out))
+    println(i.toString)
+    println(peek(c.io.out).toString)
     step(1)
   }
 
   for (i <- 0 until 5) {
-    println(i)
+    println(i.toString)
   }
 }
 
 /**
- * Create a counter and a tester.
- */
+  * Create a counter and a tester.
+  */
 object PlayTester {
   def main(args: Array[String]): Unit = {
-    chiselMainTest(Array("--genHarness", "--test", "--backend", "c",
-      "--compile", "--targetDir", "generated"),
-      () => Module(new Play(4))) {
-        c => new PlayTester(c)
-      }
+
+    chisel3.iotesters.Driver.execute(Array("--target-dir", "generated"),
+      () => new Play(4)) {
+      f => new PlayTester(f)
+    }
   }
 }
 
-class AdderTester(dut: Adder) extends Tester(dut) {
+class AdderTester(dut: Adder) extends PeekPokeTester(dut) {
 
   // Set input values
   poke(dut.io.a, 3)
@@ -371,22 +397,22 @@ class AdderTester(dut: Adder) extends Tester(dut) {
   step(1)
   // Print the result
   val res = peek(dut.io.result)
-  println(res)
+  println(res.toString())
 
   // Or compare against expected value
   expect(dut.io.result, 7)
 }
 
 /**
- * Create a counter and a tester.
- */
+  * Create a counter and a tester.
+  */
 object AdderTester {
   def main(args: Array[String]): Unit = {
-    chiselMainTest(Array("--genHarness", "--test", "--backend", "c",
-      "--compile", "--targetDir", "generated"),
-      () => Module(new Adder())) {
-        c => new AdderTester(c)
-      }
+
+    chisel3.iotesters.Driver.execute(Array("--target-dir", "generated"),
+      () => new Adder()) {
+      f => new AdderTester(f)
+    }
   }
 }
 
@@ -454,6 +480,7 @@ class Example {
 }
 
 // A singleton object
+
 object Example {
 
   // The start of a Scala program

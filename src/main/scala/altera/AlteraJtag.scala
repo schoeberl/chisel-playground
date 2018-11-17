@@ -12,8 +12,6 @@
 package altera
 
 import Chisel._
-import Node._
-import scala.collection.mutable.HashMap
 
 /**
  * The Altera JTAG 'UART' with an Atlantic interface and no documentation.
@@ -30,6 +28,7 @@ class alt_jtag_atlantic extends BlackBox {
     val t_pause = UInt(OUTPUT, 1) // ???
   }
 
+  /* TODO: fix this for Chisel 3 (and document in Chisel book)
   setVerilogParameters(new VerilogParameters {
     val INSTANCE_ID = 0
     val LOG2_RXFIFO_DEPTH = 3
@@ -48,6 +47,7 @@ class alt_jtag_atlantic extends BlackBox {
   io.t_dav.setName("t_dav")
   io.t_ena.setName("t_ena")
   io.t_pause.setName("t_pause")
+  */
 }
 
 /**
@@ -194,9 +194,8 @@ class AlteraJtagEchoTop extends Module {
   io <> jtag.io
 }
 
-object AlteraJtagEcho {
-  def main(args: Array[String]): Unit = {
-    chiselMain(Array("--backend", "v", "--targetDir", "generated"),
-      () => Module(new AlteraJtagEchoTop()))
-  }
+object AlteraJtagEcho extends App {
+  Driver.execute(Array("--target-dir", "generated"), () => new AlteraJtagEchoTop())
+//   () => Module(new AlteraJtagEchoTop())) // TODO: no wrapping in a Module here?
+
 }
