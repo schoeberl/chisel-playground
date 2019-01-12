@@ -28,6 +28,6 @@ class Hello extends Module {
  */
 object Hello {
   def main(args: Array[String]): Unit = {
-    chisel3.Driver.execute(Array[String](), () => new Hello())
+    chisel3.Driver.execute(Array("--target-dir", "generated"), () => new Hello())
   }
 }
