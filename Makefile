@@ -7,5 +7,8 @@ table-chisel:
 table-verilog:
 	sbt "runMain issues.Table xx"
 
+state-issue:
+	sbt "runMain issues.StateTester"
+
 clean:
 	git clean -fd
