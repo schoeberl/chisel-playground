@@ -5,10 +5,9 @@ import org.scalatest.flatspec.AnyFlatSpec
 
 class LoopTest extends AnyFlatSpec with ChiselScalatestTester {
 
-  "loop" should "abc" in {
+  "loop" should "run" in {
     test(new UseLoop()) { dut =>
       dut.clock.step(7)
     }
-
   }
 }
