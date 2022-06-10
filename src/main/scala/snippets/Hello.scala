@@ -8,7 +8,6 @@
 package snippets
 
 import chisel3._
-import chisel3.Driver
 
 /**
  * The blinking LED component.
@@ -28,6 +27,6 @@ class Hello extends Module {
  */
 object Hello {
   def main(args: Array[String]): Unit = {
-    chisel3.Driver.execute(Array("--target-dir", "generated"), () => new Hello())
+    emitVerilog(new Hello(), Array("--target-dir", "generated"))
   }
 }

@@ -5,8 +5,6 @@ This is a collection of small Chisel example circuits.
 
 Author: Martin Schoeberl (martin@jopdesign.com)
 
-HOWTO:
-
 ## Projects
 
 ### altera

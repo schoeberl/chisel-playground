@@ -13,7 +13,7 @@ package snippets
 import scala.io.Source._
 import Chisel._
 // this is Chisel 2 syntax by importing Chisel._ instead of chisel3._
-import chisel3.iotesters.PeekPokeTester
+// import chisel3.iotesters.PeekPokeTester
 
 // TODO: this code should all be changed to real Chisel 3 or simply dropped
 
@@ -358,6 +358,7 @@ class Play(size: Int) extends Module {
 //  io.out := r1
 }
 
+/*
 /**
   * Test the counter by printing out the value at each clock cycle.
   */
@@ -375,9 +376,12 @@ class PlayTester(c: Play) extends PeekPokeTester(c) {
   }
 }
 
+ */
+
 /**
   * Create a counter and a tester.
   */
+/*
 object PlayTester {
   def main(args: Array[String]): Unit = {
 
@@ -403,9 +407,12 @@ class AdderTester(dut: Adder) extends PeekPokeTester(dut) {
   expect(dut.io.result, 7)
 }
 
+ */
+
 /**
   * Create a counter and a tester.
   */
+/*
 object AdderTester {
   def main(args: Array[String]): Unit = {
 
@@ -415,6 +422,8 @@ object AdderTester {
     }
   }
 }
+
+ */
 
 // A simple class
 class Example {

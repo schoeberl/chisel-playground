@@ -1,7 +1,7 @@
 package snippets
 
 import Chisel._
-import chisel3.iotesters.PeekPokeTester
+//import chisel3.iotesters.PeekPokeTester
 
 class Generics[T <: Data](gen: T) extends Module {
   val io = new Bundle {
@@ -12,6 +12,7 @@ class Generics[T <: Data](gen: T) extends Module {
   io.dout := 42.U
 }
 
+/*
 class GenericsTester(dut: Generics[UInt]) extends PeekPokeTester(dut) {
 
   peek(dut.io.dout)
@@ -24,3 +25,5 @@ object GenericsTester extends App {
       f => new GenericsTester(f)
   }
 }
+
+ */

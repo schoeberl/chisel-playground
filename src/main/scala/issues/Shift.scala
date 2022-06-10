@@ -1,7 +1,6 @@
 package issues
 
 import chisel3._
-import chisel3.iotesters.PeekPokeTester
 
 class Shift extends Module {
   val io = IO(new Bundle{ val data = Output(UInt(8.W))})
@@ -21,10 +20,14 @@ class Shift extends Module {
   printf("io.data=%d\n", io.data)
 }
 
+/*
 class ShiftTester (dut: Shift) extends PeekPokeTester(dut) {
 
   step(2)
 }
+
+ */
+/*
 
 // IntelliJ is sometimes confused when using class and object with the same name (and compiling it in the terminal?)
 object Shift extends App {
@@ -34,3 +37,4 @@ object Shift extends App {
     f => new ShiftTester(f)
   }
 }
+*/

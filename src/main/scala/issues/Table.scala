@@ -76,7 +76,7 @@ class TableTop(useBB: Boolean) extends Module {
 
 object Table {
   def main(args: Array[String]): Unit = {
-    chisel3.Driver.execute(Array("--target-dir", "generated"), () => new TableTop(args.length > 0))
+    emitVerilog(new TableTop(args.length > 0), Array("--target-dir", "generated"))
   }
 
   def genTable() = {

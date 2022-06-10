@@ -194,8 +194,11 @@ class AlteraJtagEchoTop extends Module {
   io <> jtag.io
 }
 
+/*
 object AlteraJtagEcho extends App {
   Driver.execute(Array("--target-dir", "generated"), () => new AlteraJtagEchoTop())
 //   () => Module(new AlteraJtagEchoTop())) // TODO: no wrapping in a Module here?
 
 }
+
+ */
