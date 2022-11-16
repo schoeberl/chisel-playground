@@ -10,10 +10,18 @@ class MemIssue extends Module {
     val write = Input(Bool())
   })
 
+  val cntReg = RegInit(0.U(2.W))
+  cntReg := cntReg + 1.U
+
   val mem = SyncReadMem(4, UInt(16.W))
-  io.dout := mem.read(io.rdAddr)
+  // Using a Wire is the workaround for the bug
+  // val data = Wire(UInt())
+  val data = mem.read(io.rdAddr)
   when (io.write) {
     mem.write(io.wrAddr, io.din)
   }
-
+  when(cntReg === 3.U) {
+    data := 3.U
+  }
+  io.dout := data
 }

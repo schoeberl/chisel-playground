@@ -8,19 +8,15 @@ import org.scalatest.flatspec.AnyFlatSpec
 class MemIssueTest extends AnyFlatSpec with ChiselScalatestTester {
 
   "mem" should "work" in {
-    test(new MemIssue()).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
+    test(new MemIssue()).withAnnotations(Seq(WriteVcdAnnotation, VerilatorBackendAnnotation)) { dut =>
 
-      dut.io.wrAddr.poke(1.U)
-      dut.io.rdAddr.poke(1.U)
-      dut.io.din.poke(2.U)
-      dut.io.write.poke(false.B)
-      dut.clock.step(1)
-      dut.io.din.poke(3.U)
+      dut.io.wrAddr.poke(0.U)
+      dut.io.rdAddr.poke(3.U)
       dut.io.write.poke(true.B)
-      dut.clock.step(1)
-      dut.io.din.poke(4.U)
-      dut.io.write.poke(false.B)
-      dut.clock.step(5)
+      for (i <- 1 until 10) {
+        dut.io.din.poke(i.U)
+        dut.clock.step(1)
+      }
 
     }
 
